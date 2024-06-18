@@ -25,9 +25,9 @@ def main():
 
     # Define settings
     with st.sidebar:
-        with st.expander("Settings",  expanded=True):
-            TEMP = st.slider(label="LLM Temperature", min_value=0.0, max_value=1.0, value=0.5)
-            OPENAI_API_KEY = st.sidebar.text_input("OpenAI API Key", type="password")
+        TEMP = st.slider(label="LLM Temperature", min_value=0.0, max_value=1.0, value=0.5)
+        OPENAI_API_KEY = st.sidebar.text_input("OpenAI API Key", type="password")
+        MODEL = st.sidebar.selectbox("Select Model", options=["gpt-3.5-turbo", "gpt-4-turbo", "gpt-4o"])
 
     # Upload File
     file = st.file_uploader("Upload CSV file",type=["csv"])
@@ -51,7 +51,7 @@ def main():
 
         with st.chat_message("assistant"):
             # Define large language model (LLM)
-            llm = ChatOpenAI(temperature=TEMP, callbacks=[StreamHandler(st.empty())], streaming=True, openai_api_key=OPENAI_API_KEY, model="gpt-3.5-turbo")
+            llm = ChatOpenAI(temperature=TEMP, callbacks=[StreamHandler(st.empty())], streaming=True, openai_api_key=OPENAI_API_KEY, model=MODEL)
 
             # Define pandas df agent
             agent = create_pandas_dataframe_agent(llm, data, verbose=True, agent_type='openai-tools', allow_dangerous_code=True) 
