@@ -2,9 +2,11 @@
 import streamlit as st
 import pandas as pd
 from langchain_core.messages import ChatMessage
-from langchain_community.chat_models import ChatOllama
+from langchain_experimental.llms.ollama_functions import OllamaFunctions
+from langchain_community.utilities import SQLDatabase
+from sqlalchemy import create_engine
 from langchain_core.callbacks import BaseCallbackHandler
-from langchain_experimental.agents.agent_toolkits import create_pandas_dataframe_agent
+from langchain_community.agent_toolkits import create_sql_agent
 
 class StreamHandler(BaseCallbackHandler):
     def __init__(self, container, initial_text=""):
@@ -50,10 +52,15 @@ def main():
 
         with st.chat_message("assistant"):
             # Define large language model (LLM)
-            llm = ChatOllama(model="gemma2:27b", temperature=TEMP, callbacks=[StreamHandler(st.empty())], streaming=True)
+            llm = OllamaFunctions(model="gemma2:27b", temperature=TEMP, callbacks=[StreamHandler(st.empty())], streaming=True)
+            
+            # Define SQL Database
+            engine = create_engine('sqlite:///:memory:')
+            data.to_sql('data', engine, index=False)
+            db = SQLDatabase(engine=engine)
 
             # Define pandas df agent
-            agent = create_pandas_dataframe_agent(llm, data, verbose=True, agent_type='openai-tools', allow_dangerous_code=True)
+            agent = create_sql_agent(llm, db=db, verbose=True, agent_type='openai-tools')
             if instructions:
                 messages = [ChatMessage(role="user", content=instructions)] + st.session_state.messages
                 print(messages)
