@@ -2,7 +2,7 @@
 import streamlit as st
 import pandas as pd
 from langchain_core.messages import ChatMessage
-from langchain_openai import ChatOpenAI
+from langchain_community.chat_models import ChatOllama
 from langchain_core.callbacks import BaseCallbackHandler
 from langchain_experimental.agents.agent_toolkits import create_pandas_dataframe_agent
 
@@ -26,8 +26,6 @@ def main():
     # Define settings
     with st.sidebar:
         TEMP = st.slider(label="LLM Temperature", min_value=0.0, max_value=1.0, value=0.5)
-        OPENAI_API_KEY = st.sidebar.text_input("OpenAI API Key", type="password")
-        MODEL = st.sidebar.selectbox("Select Model", options=["gpt-3.5-turbo", "gpt-4-turbo", "gpt-4o"])
         st.button("Clear Messages", on_click=lambda: st.session_state.update(messages=[ChatMessage(role="assistant", content="How can I help you?")]))
 
     # Upload File
@@ -35,7 +33,7 @@ def main():
 
     instructions = st.text_area("Instructions", placeholder="Enter instructions for the chatbot")
     
-    if not file or not OPENAI_API_KEY: st.stop()
+    if not file: st.stop()
     # Read Data as Pandas
     data = pd.read_csv(file)
 
@@ -52,7 +50,7 @@ def main():
 
         with st.chat_message("assistant"):
             # Define large language model (LLM)
-            llm = ChatOpenAI(temperature=TEMP, callbacks=[StreamHandler(st.empty())], streaming=True, openai_api_key=OPENAI_API_KEY, model=MODEL)
+            llm = ChatOllama(model="gemma2:27b", temperature=TEMP, callbacks=[StreamHandler(st.empty())], streaming=True)
 
             # Define pandas df agent
             agent = create_pandas_dataframe_agent(llm, data, verbose=True, agent_type='openai-tools', allow_dangerous_code=True)
