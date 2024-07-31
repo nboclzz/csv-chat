@@ -25,15 +25,15 @@ def main():
 
     # Define settings
     with st.sidebar:
-        TEMP = st.slider(label="LLM Temperature", min_value=0.0, max_value=1.0, value=0.5)
-        OPENAI_API_KEY = st.sidebar.text_input("OpenAI API Key", type="password")
-        MODEL = st.sidebar.selectbox("Select Model", options=["gpt-3.5-turbo", "gpt-4-turbo", "gpt-4o"])
+        TEMP = 0.5
+        OPENAI_API_KEY = ""
+        MODEL = "gpt-4o-mini"
         st.button("Clear Messages", on_click=lambda: st.session_state.update(messages=[ChatMessage(role="assistant", content="How can I help you?")]))
 
     # Upload File
     file = st.file_uploader("Upload CSV file",type=["csv"])
 
-    instructions = st.text_area("Instructions", placeholder="Enter instructions for the chatbot")
+    instructions = st.text_area("Instructions", placeholder="Enter instructions for the chatbot (optional)")
     
     if not file or not OPENAI_API_KEY: st.stop()
     # Read Data as Pandas
